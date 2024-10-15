@@ -1,6 +1,7 @@
+
+
 from pico2d import *
 import random
-
 
 # Game object class here
 
