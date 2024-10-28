@@ -36,7 +36,7 @@ class StateMachine:
     #   이벤트 체크 함수
     #상태 이벤트 e = (종류, 실제값) 튜플로 정의
 def space_down(e):
-    return e[0] == 'INPUT' and e[1].key == SDL_KEYDOWN and e[1].key == SDLK_SPACE
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_SPACE
 
 def time_out(e):
     return e[0] == 'TIME_OUT'
