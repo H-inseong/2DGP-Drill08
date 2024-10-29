@@ -17,7 +17,8 @@ def handle_events():
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             running = False
         else:
-            boy.handle_event(event) #input 이벤트를 boy에게 전달하고 있다.
+            if event.type in (SDL_KEYDOWN, SDL_KEYUP):
+                boy.handle_event(event) #input 이벤트를 boy에게 전달하고 있다.
 
 
 def reset_world():
@@ -58,6 +59,6 @@ while running:
     handle_events()
     update_world()
     render_world()
-    delay(0.01)
+    delay(0.03)
 # finalization code
 close_canvas()
