@@ -1,12 +1,12 @@
 from tabnanny import check
 
-from sdl2 import SDL_KEYDOWN, SDLK_SPACE, SDLK_RIGHT, SDLK_LEFT, SDL_KEYUP
-
+from sdl2 import SDL_KEYDOWN, SDLK_SPACE, SDLK_RIGHT, SDLK_LEFT, SDL_KEYUP, SDLK_a
 
 class StateMachine:
     def __init__(self, o):
         self.obj = o    # 어떤 객체를 위한 상태 머신인지 알려줌.
         self.event_q = [] # 이벤트 보관 튜플 리스트(큐)
+
     def add_event(self, e):
         print(f'    Debug: add event {e}')
         self.event_q.append(e)
@@ -48,6 +48,9 @@ class StateMachine:
     #상태 이벤트 e = (종류, 실제값) 튜플로 정의
 def space_down(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_SPACE
+
+def a_down(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_a
 
 def time_out(e):
     return e[0] == 'TIME_OUT'

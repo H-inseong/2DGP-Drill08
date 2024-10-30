@@ -1,6 +1,6 @@
 from pico2d import load_image, get_time
 
-from state_machine import StateMachine, time_out, space_down, right_down, left_down, right_up, left_up
+from state_machine import StateMachine, time_out, space_down, right_down, left_down, right_up, left_up, a_down
 
 
 class Boy:
@@ -16,9 +16,19 @@ class Boy:
         self.state_machine.start(Idle) # 초기상태 Idle
         self.state_machine.set_transitions(
             {
-                Idle: {right_down: Run, left_down: Run, left_up: Run, right_up: Run, time_out: Sleep},
-                Run: {right_down: Idle, left_down: Idle, right_up: Idle, left_up: Idle},
-                Sleep: {right_down: Run, left_down: Run, right_up: Run, left_up: Run, space_down: Idle}
+                Idle: {right_down: Run, left_down: Run, left_up: Run, right_up: Run,
+                       time_out: Sleep,
+                       a_down: AutoRun},
+
+                Run: {right_down: Idle, left_down: Idle, right_up: Idle, left_up: Idle
+                      , a_down: AutoRun},
+
+                Sleep: {right_down: Run, left_down: Run, right_up: Run, left_up: Run,
+                        space_down: Idle ,
+                        a_down: AutoRun},
+
+                AutoRun : { right_down: Run, left_down: Run, left_up: Run, right_up: Run,
+                            time_out: Idle}
             }
         )
 
@@ -99,6 +109,7 @@ class Sleep:
 class Run:
     @staticmethod
     def enter(boy, e):
+        boy.start_time = get_time()
         if right_down(e) or left_up(e):
             boy.dir = 1 # 우
             boy.face_dir = 1
@@ -107,7 +118,7 @@ class Run:
             boy.dir = -1 # 좌
             boy.face_dir = -1
             boy.action = 0
-        boy.frame = 0
+
         pass
 
     @staticmethod
@@ -117,6 +128,13 @@ class Run:
     @staticmethod
     def do(boy):
         boy.x += boy.dir * 5
+
+        if boy.x + 25 > 800:
+            boy.x = 775
+
+        if boy.x - 25 < 0:
+            boy.x = 25
+
         boy.frame = ( boy.frame + 1 ) % 8
         pass
 
@@ -127,3 +145,53 @@ class Run:
             boy.x, boy.y
         )
         pass
+
+class AutoRun:
+    @staticmethod
+    def enter(boy, e):
+
+        if boy.face_dir == 1:
+            boy.dir = 1
+            boy.action = 1
+
+        if boy.face_dir == -1:
+            boy.dir = -1
+            boy.action = 0
+
+        boy.frame = 0
+        pass
+
+    @staticmethod
+    def exit(boy, e):
+        pass
+
+    @staticmethod
+    def do(boy):
+
+        boy.x += boy.dir * 1
+        boy.frame = (boy.frame + 1) % 8
+
+        boy.dir += 0.5 * (abs(boy.dir) // boy.dir)      #속도 증가
+
+
+        # 경계 처리
+
+        if boy.x + 25 >= 800:
+            boy.dir = -abs(boy.dir)
+            boy.action = 0
+            boy.face_dir = -1
+
+        if boy.x - 25 <= 0:
+            boy.dir = abs(boy.dir)
+            boy.action = 1
+            boy.face_dir = 1
+
+
+        if get_time() - boy.start_time >= 5:
+           boy.state_machine.add_event(('TIME_OUT', 0))
+
+    @staticmethod
+    def draw(boy):
+        boy.image.clip_draw(
+            boy.frame * 100, boy.action * 100, 100, 100,
+            boy.x, boy.y + 25 , 100 + 50 , 100 + 50)        # 크기 증가
